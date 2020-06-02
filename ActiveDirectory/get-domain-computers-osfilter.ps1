@@ -1,0 +1,22 @@
+$domainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+$PDC = ($domainObj.PdcRoleOwner).Name
+$SearchString = "LDAP://"
+$SearchString += $PDC + "/"
+
+$DistinguishedName = "DC=$($domainObj.Name.Replace('.', ',DC='))"
+$SearchString += $DistinguishedName
+$Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchString)
+$objDomain = New-Object System.DirectoryServices.DirectoryEntry
+$Searcher.SearchRoot = $objDomain
+$Searcher.Filter = "objectcategory=CN=Computer,CN=Schema,CN=Configuration,DC=corp,DC=com"
+$Searcher.Filter = "operatingsystem=Windows 10*"
+$Result = $Searcher.FindAll()
+Foreach($obj in $Result)
+{
+    Foreach($prop in $obj.Properties)
+    {
+        $prop
+    }
+    Write-Host "------------------------"
+}
+
